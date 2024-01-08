@@ -86,5 +86,20 @@ private:
     Float_t   fScale;
     Float_t   fMagnetic;        // Angular offset of magnetic north
 
+    const Float_t kZero        =  0.5;
+    const Float_t kRadius1     = 83.0;
+    const Float_t kOuterMajorPoints = 92.0;
+    const Float_t kOuterPoints =  8.0;
+
+    Float_t   fAspect;          // Aspect ratio
+
+    // Break down the drawing a tad. Helper functions for each artifact. 
+    void MakeCenterCross(void);
+    void TrueNorthMajorPoints(void);
+
+    RosePoints *point1;
+    RosePoints *point2;
+    Float_t    fwh, fhh;
+
 };
 #endif
