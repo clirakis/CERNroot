@@ -281,6 +281,8 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
     // 4 longish lines along true north. 
     Float_t Angle  = Variation;
     Float_t Radius = 0.0;
+    char    text[128];
+    TText   *tv;
 
 #if 0
     // https://root.cern.ch/doc/master/classTAttText.html
@@ -340,7 +342,29 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 	point2->Shift(0.5,0.5);
 
 	fPad->PaintLine(point1->GetX(),point1->GetY(),point2->GetX(),point2->GetY());
-
+	tv = new TText();
+	// Add text
+	if (Outer)
+	{
+	    if (i%10==0)
+	    {
+		sprintf(text, "%3.0f", Angle);
+		//tv = new TText(point2->GetX(), point2->GetY(), text);
+		tv->SetText(point2->GetX(), point2->GetY(), text);
+		tv->SetTextAlign(21);
+		tv->SetTextSize(0.02);
+		tv->SetTextColor(6);
+		tv->SetTextAngle(-Angle);
+		tv->Draw();
+	    }
+	}
+	else
+	{
+	    if (i%30==0)
+	    {
+		// Fill in after we get the above right. 
+	    }
+	}
 	Angle = Angle + 1.0;
     }
 }
