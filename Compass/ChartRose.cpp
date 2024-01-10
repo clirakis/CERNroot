@@ -111,10 +111,7 @@ ChartRose::~ChartRose (void)
  */
 void ChartRose::Paint(Option_t *)
 {
-    const Float_t kDiv1        =  5.0;   // Divisions around True and mag 
-    const Float_t kDiv2        =  3.5;
-    const Float_t kDiv3        =  2.0;
-
+    const Float_t Var = -4.0;    // temporary placeholder
     //static RosePoints *point1 = new RosePoints();
     //static RosePoints *point2 = new RosePoints();
 
@@ -124,51 +121,15 @@ void ChartRose::Paint(Option_t *)
     fhh = (Float_t)fPad->YtoPixel(fPad->GetY1());
     fAspect = fwh/fhh;
 
-    MakeCenterCross();
-    TrueNorthMajorPoints();
+    MakeCenterCross(Var);
+    // True North major markings
+    MajorPoints(kOuterMajorPoints, kOuterMajorPoints+kOuterPoints);
+    MajorPoints(kInnerMag[0], kInnerMag[1], Var);
+    MajorPoints(kInnerMag[2], kInnerMag[3], Var);
 
-    Angle = 0.0;
-    // Draw outer rose scale
-    for (UInt_t i=0; i<360; i++)
-    {
-	y0 = kRadius1*fScale;   // 0 degrees, North. 
-	point1->SetXY(0.0, y0);
-	if (i%10==0)
-	{
-	    y1 = y0 + kDiv1*fScale;
-	}
-	else if (i%5==0)
-	{
-	    y1 = y0 + kDiv2*fScale;
-	}
-	else
-	{
-	    y1 = y0 + kDiv3*fScale;
-	}
-	point2->SetXY(0.0, y1);
+    Ring();
+    Ring(kFALSE, Var);
 
-	point1->Rotate(Angle);
-	point2->Rotate(Angle);
-
-	if (fwh < fhh) 
-	{                   // scale in oder to draw circle scale
-	    point1->Scale(0.5,0.5*fwh/fhh);
-	    point2->Scale(0.5,0.5*fwh/fhh);
-	} 
-	else 
-	{
-	    point1->Scale(0.5*fhh/fwh,0.5);
-	    point2->Scale(0.5*fhh/fwh,0.5);
-	}
-
-	point1->Shift(0.5,0.5);              // move to center of pad
-	point2->Shift(0.5,0.5);
-
-	fPad->PaintLine(point1->GetX(),point1->GetY(),point2->GetX(),point2->GetY());
-
-	Angle = Angle + 1.0;
-    }
-   
 #if 0
 
    Float_t fwh = (Float_t)fPad->XtoPixel(fPad->GetX2());
@@ -206,7 +167,7 @@ void ChartRose::Paint(Option_t *)
  *
  * Function Name : 
  *
- * Description :
+ * Description : PUT IN VARIATION ANGLE. 
  *
  * Inputs :
  *
@@ -221,7 +182,7 @@ void ChartRose::Paint(Option_t *)
  *
  *******************************************************************
  */
-void ChartRose::MakeCenterCross(void)
+void ChartRose::MakeCenterCross(Float_t Variation)
 {
     const Float_t kCrossDim    =  5.0;   // These are just an arbitray scale.
 
@@ -258,18 +219,18 @@ void ChartRose::MakeCenterCross(void)
  *
  *******************************************************************
  */
-void ChartRose::TrueNorthMajorPoints(void)
+void ChartRose::MajorPoints(Float_t r1, Float_t r2, Float_t Variation)
 {
     Float_t x0,y0, x1, y1;      // Working variables. 
     // Draw some other static features
     // 4 longish lines along true north. 
-    Float_t Angle = 0.0;
+    Float_t Angle = Variation;
     for (UInt_t i=0; i<4; i++)
     {
-	y0 = kOuterMajorPoints * fScale;
-	y1 = y0 + kOuterPoints * fScale;
-	point1->SetXY(0.0, y0);
-	point2->SetXY(0.0, y1);
+//	y0 = kOuterMajorPoints * fScale;
+//	y1 = y0 + kOuterPoints * fScale;
+	point1->SetXY(0.0, r1*fScale);
+	point2->SetXY(0.0, r2*fScale);
 
 	point1->Rotate(Angle);
 	point2->Rotate(Angle);
@@ -291,5 +252,95 @@ void ChartRose::TrueNorthMajorPoints(void)
 	fPad->PaintLine(point1->GetX(),point1->GetY(),point2->GetX(),point2->GetY());
 
 	Angle = Angle + 90.0;
+    }
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : 
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::Ring(Bool_t Outer, Float_t Variation)
+{
+    Float_t x0,y0, x1, y1;      // Working variables. 
+    // Draw some other static features
+    // 4 longish lines along true north. 
+    Float_t Angle  = Variation;
+    Float_t Radius = 0.0;
+
+#if 0
+    // https://root.cern.ch/doc/master/classTAttText.html
+    TText *tv = new TText(0.5, 0.5, "0.0");
+    tv->SetTextAlign(21);
+    tv->SetTextSize(0.02);
+    tv->SetTextColor(6);
+    tv->Draw();
+#endif
+
+    if(Outer)
+    {
+	Radius = kRadius1;
+    }
+    else
+    {
+	Radius = kRadius2;
+    }
+
+    // Draw outer rose scale
+    for (UInt_t i=0; i<360; i++)
+    {
+	y0 = Radius*fScale;   // 0 degrees, North. 
+	point1->SetXY(0.0, y0);
+	if (i%10==0)
+	{
+	    // 10 degree tics
+	    y1 = y0 + kDiv1*fScale;
+	}
+	else if (i%5==0)
+	{
+	    // 5 degree tics
+	    y1 = y0 + kDiv2*fScale;
+	}
+	else
+	{
+	    // 1 degree tics
+	    y1 = y0 + kDiv3*fScale;
+	}
+	point2->SetXY(0.0, y1);
+
+	point1->Rotate(Angle);
+	point2->Rotate(Angle);
+
+	if (fwh < fhh) 
+	{                   // scale in oder to draw circle scale
+	    point1->Scale(0.5,0.5*fwh/fhh);
+	    point2->Scale(0.5,0.5*fwh/fhh);
+	} 
+	else 
+	{
+	    point1->Scale(0.5*fhh/fwh,0.5);
+	    point2->Scale(0.5*fhh/fwh,0.5);
+	}
+
+	point1->Shift(0.5,0.5);              // move to center of pad
+	point2->Shift(0.5,0.5);
+
+	fPad->PaintLine(point1->GetX(),point1->GetY(),point2->GetX(),point2->GetY());
+
+	Angle = Angle + 1.0;
     }
 }

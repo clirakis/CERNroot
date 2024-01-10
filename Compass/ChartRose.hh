@@ -88,14 +88,21 @@ private:
 
     const Float_t kZero        =  0.5;
     const Float_t kRadius1     = 83.0;
+    const Float_t kRadius2     = 60.0;
     const Float_t kOuterMajorPoints = 92.0;
     const Float_t kOuterPoints =  8.0;
+    const Float_t kDiv1        =  5.0;   // Divisions around True and mag 
+    const Float_t kDiv2        =  3.5;
+    const Float_t kDiv3        =  2.0;
+    const Float_t kInnerMag[4] =  {22.5,57.0, 69.0, 80.0};
 
     Float_t   fAspect;          // Aspect ratio
 
     // Break down the drawing a tad. Helper functions for each artifact. 
-    void MakeCenterCross(void);
-    void TrueNorthMajorPoints(void);
+    void MakeCenterCross(Float_t Variation);
+    void MajorPoints(Float_t r1, Float_t r2, Float_t Variation=0.0);
+    // Standard compass ring
+    void Ring(Bool_t Outer=kTRUE, Float_t Variation = 0.0); 
 
     RosePoints *point1;
     RosePoints *point2;
