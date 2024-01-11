@@ -100,7 +100,7 @@ private:
     Float_t   fAspect;          // Aspect ratio
 
     // Break down the drawing a tad. Helper functions for each artifact.
-    void DrawLine(Float_t angle=0.0);
+    void DrawLine(Float_t angle=0.0, Bool_t IsLine=kTRUE);
     void MakeCenterCross(Float_t Variation);
     void MajorPoints(Float_t r1, Float_t r2, Float_t Variation=0.0);
     // Standard compass ring

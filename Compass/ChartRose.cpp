@@ -107,7 +107,7 @@ ChartRose::~ChartRose (void)
  *
  *******************************************************************
  */
-void ChartRose::DrawLine(Float_t angle)
+void ChartRose::DrawLine(Float_t angle, Bool_t IsLine)
 {
     const Float_t kScalex = 0.5;
     const Float_t kScaley = 0.5;
@@ -128,7 +128,17 @@ void ChartRose::DrawLine(Float_t angle)
     
     point1->Shift( kZero, kZero);              // move to center of pad
     point2->Shift( kZero, kZero);
-    
+//     if (IsLine)
+//     {
+// 	fPad->PaintLine( point1->GetX(), point1->GetY(),
+// 			 point2->GetX(),point2->GetY());
+//     }
+//     else
+//     {
+// 	fPad->PaintArrow( point1->GetX(), point1->GetY(),
+// 			 point2->GetX(),point2->GetY());
+//     }
+    // FIX LATER
     fPad->PaintLine( point1->GetX(), point1->GetY(),
 		     point2->GetX(),point2->GetY());
 }
@@ -232,7 +242,7 @@ void ChartRose::MajorPoints(Float_t r1, Float_t r2, Float_t Variation)
     {
 	point1->SetXY(0.0, r1*fScale);
 	point2->SetXY(0.0, r2*fScale);
-	DrawLine(Angle);
+	DrawLine(Angle, i!=0);
 	Angle = Angle + 90.0;
     }
 }
@@ -310,7 +320,19 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 		tv->SetTextAlign(21);
 		tv->SetTextSize(0.02);
 		tv->SetTextColor(6);
-		tv->SetTextAngle(-theta);
+		if (Angle <= 90.0)
+		{
+		    tv->SetTextAngle(-theta);
+		}
+		else if (Angle < 270.0)
+		{
+		    tv->SetTextAngle(180.0 - theta);
+		    tv->SetTextAlign(23);
+		}
+		else
+		{
+		    tv->SetTextAngle(-theta);
+		}
 		tv->Draw();
 	    }
 	}
