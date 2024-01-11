@@ -38,9 +38,10 @@ public:
    RosePoints(Coord_t x=0, Coord_t y=0) : TPoints(x,y) { }
    ~RosePoints() { }
 
-   void SetXY(Coord_t x, Coord_t y) { SetX(x); SetY(y); }
+    void SetXY(Coord_t x, Coord_t y) { SetX(x); SetY(y); };
 
-   void Rotate(Float_t Angle)  // Rotates the coordinate system a angle degrees clockwise
+   // Rotates the coordinate system a angle degrees clockwise
+   void Rotate(Float_t Angle)  
    {
 
       Float_t rX, rY;
@@ -49,10 +50,10 @@ public:
       rX = GetX()*TMath::Cos(theta)+GetY()*TMath::Sin(theta);
       rY = GetY()*TMath::Cos(theta)-GetX()*TMath::Sin(theta);
       SetXY(rX,rY);
-   }
+   };
 
-   void Scale(Float_t factorX, Float_t factorY) { SetX(GetX()*factorX); SetY(GetY()*factorY); }
-   void Shift(Coord_t x, Coord_t y) { SetX(GetX()+x); SetY(GetY()+y); }
+    void Scale(Float_t factorX, Float_t factorY) { SetX(GetX()*factorX); SetY(GetY()*factorY); };
+    void Shift(Coord_t x, Coord_t y) { SetX(GetX()+x); SetY(GetY()+y); };
 };
 
 
@@ -61,7 +62,7 @@ class ChartRose : public TObject {
 public:
     /// Default Constructor 
     /// default magnetic offset to true north is 4.0 degrees.  
-    ChartRose( Int_t csize=100, Float_t Magnetic=4.0);
+    ChartRose( Int_t csize=600, Float_t Magnetic=4.0);
     /// Default destructor
     virtual ~ChartRose();
 
@@ -82,7 +83,7 @@ public:
    ClassDef(ChartRose,0)  // Chart based compass rose
 
 private:
-    TPad       *fPad;            // pad where this compass rose is drawn
+    TPad      *fPad;            // pad where this compass rose is drawn
     Float_t   fScale;
     Float_t   fMagnetic;        // Angular offset of magnetic north
 
@@ -98,7 +99,8 @@ private:
 
     Float_t   fAspect;          // Aspect ratio
 
-    // Break down the drawing a tad. Helper functions for each artifact. 
+    // Break down the drawing a tad. Helper functions for each artifact.
+    void DrawLine(Float_t angle=0.0);
     void MakeCenterCross(Float_t Variation);
     void MajorPoints(Float_t r1, Float_t r2, Float_t Variation=0.0);
     // Standard compass ring
