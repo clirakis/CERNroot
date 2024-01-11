@@ -53,11 +53,16 @@ ChartRose::ChartRose (Int_t csize, Float_t Magnetic) : TObject()
    fPad = new TCanvas("Compass:canvas","Compass",-csize,csize);
    fPad->SetFillColor(0);     // white
    fPad->SetLineColor(6);     // pinkish. 
-   fScale = 1.0/100.0;
+   fPad->SetLineWidth(1);
+   fScale = 1.0/120.0;
    fMagnetic = Magnetic * TMath::DegToRad();
    SetBit(kCanDelete);
-   point1 = new RosePoints();
-   point2 = new RosePoints();
+   fpoint1 = new RosePoints();
+   fpoint2 = new RosePoints();
+   fArrow  = new TArrow();
+   fArrow->SetLineColor(6);
+   fArrow->SetFillColor(6);
+   fArrow->SetArrowSize(2.0*fScale);
 
    Draw();                    // append this Rose to fPad
 }
@@ -84,13 +89,14 @@ ChartRose::ChartRose (Int_t csize, Float_t Magnetic) : TObject()
  */
 ChartRose::~ChartRose (void)
 {
-    delete point1;
-    delete point2;
+    delete fpoint1;
+    delete fpoint2;
+    delete fArrow;
 }
 /**
  ******************************************************************
  *
- * Function Name : ChartRose destructor
+ * Function Name : DrawLine
  *
  * Description :
  *
@@ -107,40 +113,77 @@ ChartRose::~ChartRose (void)
  *
  *******************************************************************
  */
-void ChartRose::DrawLine(Float_t angle, Bool_t IsLine)
+void ChartRose::DrawLine(Float_t angle)
 {
     const Float_t kScalex = 0.5;
     const Float_t kScaley = 0.5;
 
-    point1->Rotate(angle);
-    point2->Rotate(angle);
+    fpoint1->Rotate(angle);
+    fpoint2->Rotate(angle);
 
     if (fwh < fhh) 
     {                   // scale in oder to draw circle scale
-	point1->Scale(kScalex, kScaley*fwh/fhh);
-	point2->Scale(kScalex, kScaley*fwh/fhh);
+	fpoint1->Scale(kScalex, kScaley*fwh/fhh);
+	fpoint2->Scale(kScalex, kScaley*fwh/fhh);
     } 
     else 
     {
-	point1->Scale(kScalex*fhh/fwh, kScaley);
-	point2->Scale(kScalex*fhh/fwh, kScaley);
+	fpoint1->Scale(kScalex*fhh/fwh, kScaley);
+	fpoint2->Scale(kScalex*fhh/fwh, kScaley);
     }
     
-    point1->Shift( kZero, kZero);              // move to center of pad
-    point2->Shift( kZero, kZero);
-//     if (IsLine)
-//     {
-// 	fPad->PaintLine( point1->GetX(), point1->GetY(),
-// 			 point2->GetX(),point2->GetY());
-//     }
-//     else
-//     {
-// 	fPad->PaintArrow( point1->GetX(), point1->GetY(),
-// 			 point2->GetX(),point2->GetY());
-//     }
-    // FIX LATER
-    fPad->PaintLine( point1->GetX(), point1->GetY(),
-		     point2->GetX(),point2->GetY());
+    fpoint1->Shift( kZero, kZero);              // move to center of pad
+    fpoint2->Shift( kZero, kZero);
+    fPad->PaintLine( fpoint1->GetX(), fpoint1->GetY(),
+		     fpoint2->GetX(), fpoint2->GetY());
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : MagneticNorth
+ *
+ * Description :
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::MagneticNorth(Float_t Angle)
+{
+    const Float_t kScalex = 0.5;
+    const Float_t kScaley = 0.5;
+    fpoint1->SetXY(0.0, kInnerMag[2]*fScale);
+    fpoint2->SetXY(0.0, kInnerMag[3]*fScale);
+    fpoint1->Rotate(Angle);
+    fpoint2->Rotate(Angle);
+
+    if (fwh < fhh) 
+    {                   // scale in oder to draw circle scale
+	fpoint1->Scale(kScalex, kScaley*fwh/fhh);
+	fpoint2->Scale(kScalex, kScaley*fwh/fhh);
+    } 
+    else 
+    {
+	fpoint1->Scale(kScalex*fhh/fwh, kScaley);
+	fpoint2->Scale(kScalex*fhh/fwh, kScaley);
+    }    
+    fpoint1->Shift( kZero, kZero);              // move to center of pad
+    fpoint2->Shift( kZero, kZero);
+    cout << "ARROW: " << endl;
+    fArrow->SetX1( fpoint1->GetX());
+    fArrow->SetY1( fpoint1->GetY());
+    fArrow->SetX2( fpoint2->GetX());
+    fArrow->SetY2( fpoint2->GetY());
+    fArrow->Paint("|>");
 }
 
 
@@ -174,6 +217,7 @@ void ChartRose::Paint(Option_t *)
     fAspect = fwh/fhh;
 
     MakeCenterCross(Var);
+    MagneticNorth(Var);
     // True North major markings
     MajorPoints(kOuterMajorPoints, kOuterMajorPoints+kOuterPoints);
     MajorPoints(kInnerMag[0], kInnerMag[1], Var);
@@ -187,7 +231,7 @@ void ChartRose::Paint(Option_t *)
  *
  * Function Name : 
  *
- * Description : PUT IN VARIATION ANGLE. 
+ * Description : 
  *
  * Inputs :
  *
@@ -205,11 +249,11 @@ void ChartRose::Paint(Option_t *)
 void ChartRose::MakeCenterCross(Float_t Variation)
 {
     const Float_t kCrossDim    =  5.0;   // These are just an arbitray scale.
-    point1->SetXY(0.0, -kCrossDim*fScale/2.0);
-    point2->SetXY(0.0,  kCrossDim*fScale/2.0);
+    fpoint1->SetXY(0.0, -kCrossDim*fScale/2.0);
+    fpoint2->SetXY(0.0,  kCrossDim*fScale/2.0);
     DrawLine( Variation);
-    point1->SetXY(0.0, -kCrossDim*fScale/2.0);
-    point2->SetXY(0.0,  kCrossDim*fScale/2.0);
+    fpoint1->SetXY(0.0, -kCrossDim*fScale/2.0);
+    fpoint2->SetXY(0.0,  kCrossDim*fScale/2.0);
     DrawLine( 90.0 + Variation);
 }
 /**
@@ -236,14 +280,15 @@ void ChartRose::MajorPoints(Float_t r1, Float_t r2, Float_t Variation)
 {
     Float_t x0,y0, x1, y1;      // Working variables. 
     // Draw some other static features
-    // 4 longish lines along true north. 
+    // 3 longish lines along true north. 
     Float_t Angle = Variation;
+
     for (UInt_t i=0; i<4; i++)
     {
-	point1->SetXY(0.0, r1*fScale);
-	point2->SetXY(0.0, r2*fScale);
-	DrawLine(Angle, i!=0);
+	fpoint1->SetXY(0.0, r1*fScale);
+	fpoint2->SetXY(0.0, r2*fScale);
 	Angle = Angle + 90.0;
+	DrawLine(Angle);
     }
 }
 /**
@@ -290,7 +335,7 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
     for (UInt_t i=0; i<360; i++)
     {
 	y0 = Radius*fScale;   // 0 degrees, North. 
-	point1->SetXY(0.0, y0);
+	fpoint1->SetXY(0.0, y0);
 	if (i%10==0)
 	{
 	    // 10 degree tics
@@ -306,7 +351,7 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 	    // 1 degree tics
 	    y1 = y0 + kDiv3*fScale;
 	}
-	point2->SetXY(0.0, y1);
+	fpoint2->SetXY(0.0, y1);
 	DrawLine(theta);
 
 	tv = new TText();
@@ -316,7 +361,7 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 	    if (i%10==0)
 	    {
 		sprintf(text, "%3.0f", Angle);
-		tv->SetText(point2->GetX(), point2->GetY(), text);
+		tv->SetText(fpoint2->GetX(), fpoint2->GetY(), text);
 		tv->SetTextAlign(21);
 		tv->SetTextSize(0.02);
 		tv->SetTextColor(6);
@@ -333,7 +378,7 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 		{
 		    tv->SetTextAngle(-theta);
 		}
-		tv->Draw();
+		tv->Paint(); // Draw goes to paint
 	    }
 	}
 	else
@@ -342,15 +387,70 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
 	    {
 		// Fill in after we get the above right. 
 		sprintf(text, "%3.0f", Angle);
-		tv->SetText(point2->GetX(), point2->GetY(), text);
+		tv->SetText(fpoint2->GetX(), fpoint2->GetY(), text);
 		tv->SetTextAlign(21);
 		tv->SetTextSize(0.02);
 		tv->SetTextColor(6);
 		tv->SetTextAngle(-Angle);
-		tv->Draw();
+		tv->Paint();
 	    }
 	}
 	Angle = Angle + 1.0;
 	theta = Angle + Variation;
     }
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : NorthStar
+ *
+ * Description : 10 triangles, 2 types. One filled the other not. 
+ *
+ * Angles:
+ *      at base 10 looking up 18 degrees
+ *      5 points looking up   75 degrees
+ *
+ * Lengths:
+ *         Vertical: 5
+ *         Side:     4
+ *         
+ *
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::NorthStar(void)
+{
+#if 0
+    const Float_t kScalex = 0.5;
+    const Float_t kScaley = 0.5;
+
+    fpoint1->Rotate(angle);
+    fpoint2->Rotate(angle);
+
+    if (fwh < fhh) 
+    {                   // scale in oder to draw circle scale
+	fpoint1->Scale(kScalex, kScaley*fwh/fhh);
+	fpoint2->Scale(kScalex, kScaley*fwh/fhh);
+    } 
+    else 
+    {
+	fpoint1->Scale(kScalex*fhh/fwh, kScaley);
+	fpoint2->Scale(kScalex*fhh/fwh, kScaley);
+    }
+    
+    fpoint1->Shift( kZero, kZero);              // move to center of pad
+    fpoint2->Shift( kZero, kZero);
+    fPad->PaintLine( fpoint1->GetX(), fpoint1->GetY(),
+		     fpoint2->GetX(), fpoint2->GetY());
+#endif
 }

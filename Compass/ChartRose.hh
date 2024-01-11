@@ -29,6 +29,7 @@
 #include <TPolyLine.h>
 #include <TDatime.h>
 #include <TPoints.h>
+#include <TArrow.h>
 #include <TMath.h>
 
 // Outer compass rose
@@ -96,18 +97,23 @@ private:
     const Float_t kDiv2        =  3.5;
     const Float_t kDiv3        =  2.0;
     const Float_t kInnerMag[4] =  {22.5,57.0, 69.0, 80.0};
+    const Float_t kArrow       = 12.0;
 
     Float_t   fAspect;          // Aspect ratio
 
     // Break down the drawing a tad. Helper functions for each artifact.
-    void DrawLine(Float_t angle=0.0, Bool_t IsLine=kTRUE);
+    void DrawLine(Float_t angle=0.0);
     void MakeCenterCross(Float_t Variation);
     void MajorPoints(Float_t r1, Float_t r2, Float_t Variation=0.0);
+    void MagneticNorth(Float_t Angle);
+    void NorthStar(void);
+
     // Standard compass ring
     void Ring(Bool_t Outer=kTRUE, Float_t Variation = 0.0); 
 
-    RosePoints *point1;
-    RosePoints *point2;
+    RosePoints *fpoint1;
+    RosePoints *fpoint2;
+    TArrow     *fArrow;
     Float_t    fwh, fhh;
 
 };
