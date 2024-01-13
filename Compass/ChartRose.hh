@@ -98,6 +98,8 @@ private:
     const Float_t kDiv3        =  2.0;
     const Float_t kInnerMag[4] =  {22.5,57.0, 69.0, 80.0};
     const Float_t kArrow       = 12.0;
+    const Float_t kScalex      = 0.5;
+    const Float_t kScaley      = 0.5;
 
     Float_t   fAspect;          // Aspect ratio
 
@@ -107,6 +109,8 @@ private:
     void MajorPoints(Float_t r1, Float_t r2, Float_t Variation=0.0);
     void MagneticNorth(Float_t Angle);
     void NorthStar(void);
+    void Cardinal(Float_t Variation);
+    void Letters(Float_t Variation, Float_t AnnualIncrease);
 
     // Standard compass ring
     void Ring(Bool_t Outer=kTRUE, Float_t Variation = 0.0); 

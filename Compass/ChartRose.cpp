@@ -115,8 +115,6 @@ ChartRose::~ChartRose (void)
  */
 void ChartRose::DrawLine(Float_t angle)
 {
-    const Float_t kScalex = 0.5;
-    const Float_t kScaley = 0.5;
 
     fpoint1->Rotate(angle);
     fpoint2->Rotate(angle);
@@ -178,7 +176,7 @@ void ChartRose::MagneticNorth(Float_t Angle)
     }    
     fpoint1->Shift( kZero, kZero);              // move to center of pad
     fpoint2->Shift( kZero, kZero);
-    cout << "ARROW: " << endl;
+
     fArrow->SetX1( fpoint1->GetX());
     fArrow->SetY1( fpoint1->GetY());
     fArrow->SetX2( fpoint2->GetX());
@@ -218,6 +216,7 @@ void ChartRose::Paint(Option_t *)
 
     MakeCenterCross(Var);
     MagneticNorth(Var);
+    Cardinal(Var);
     // True North major markings
     MajorPoints(kOuterMajorPoints, kOuterMajorPoints+kOuterPoints);
     MajorPoints(kInnerMag[0], kInnerMag[1], Var);
@@ -225,6 +224,8 @@ void ChartRose::Paint(Option_t *)
 
     Ring();
     Ring(kFALSE, Var);
+
+    Letters(Var, 0.0);
 }
 /**
  ******************************************************************
@@ -453,4 +454,127 @@ void ChartRose::NorthStar(void)
     fPad->PaintLine( fpoint1->GetX(), fpoint1->GetY(),
 		     fpoint2->GetX(), fpoint2->GetY());
 #endif
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : Cardinal
+ *
+ * Description : Make the inner most magnetic ring of the 
+ *               cardinal points
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::Cardinal(Float_t Variation)
+{
+    const Float_t Radius = 57.0;
+    const Float_t kTic1  = 6.5;   // Modulo 4 units
+    const Float_t kTic2  = 3.0;   // Modulo 2
+    const Float_t kTic3  = 2.0;   // Modulo 1
+    const Int_t   NTic   = 32*4;  // 32 major points
+    const Float_t dTheta = 360.0/((Float_t)NTic);
+    Float_t y0, y1;
+	
+    // Draw some other static features
+    // 4 longish lines along true north. 
+    Float_t Angle  = Variation;
+
+    // 32 major tics total, offset by Variation
+    for (UInt_t i=0; i<NTic; i++)
+    {
+	y0 = Radius*fScale;
+	fpoint1->SetXY(0.0, y0);
+	if (i%4==0)
+	{
+	    // 10 degree tics
+	    y1 = y0 - kTic1*fScale;
+	}
+	else if (i%2==0)
+	{
+	    // 5 degree tics
+	    y1 = y0 - kTic2*fScale;
+	}
+	else
+	{
+	    // 1 degree tics
+	    y1 = y0 - kTic3*fScale;
+	}
+	fpoint2->SetXY(0.0, y1);
+	DrawLine(Angle);
+
+	Angle = Angle + dTheta;
+    }
+}
+/**
+ ******************************************************************
+ *
+ * Function Name : Letters
+ *
+ * Description : Make the letters pertaining to the Variation
+ *               
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::Letters(Float_t Variation, Float_t AnnualIncrease)
+{
+    const Float_t Radius1 = 47.0;
+    const Float_t Radius2 = 17.0;
+    const char    *MText   = "MAGNETIC";
+    char  s[4];
+
+    TText   *tv;
+    Int_t N        = strlen(MText);
+    Float_t DAngle = 25.0/((Float_t)N);
+    Float_t Angle  = Variation - 3.0*DAngle;
+    Float_t TextAngle = -3.0*DAngle + Variation;
+
+    // The word magnetic with the N 
+    for (UInt_t i=0; i<N; i++)
+    {
+	fpoint1->SetXY(0.0, Radius1*fScale);
+	fpoint1->Rotate(Angle);
+	if (fwh < fhh) 
+	{                   // scale in oder to draw circle scale
+	    fpoint1->Scale(kScalex, kScaley*fwh/fhh);
+	} 
+	else 
+	{
+	    fpoint1->Scale(kScalex*fhh/fwh, kScaley);
+	}
+    
+	fpoint1->Shift( kZero, kZero);              // move to center of pad
+
+	tv = new TText();
+	// Add text
+	sprintf(s, "%c", MText[i]);
+	tv->SetText(fpoint1->GetX(), fpoint1->GetY(), s);
+	tv->SetTextAlign(21);
+	tv->SetTextSize(0.015);
+	tv->SetTextColor(6);
+	tv->SetTextAngle(-TextAngle);
+	tv->Paint(); // Draw goes to paint
+
+	Angle = Angle + DAngle;
+	TextAngle = TextAngle + DAngle;
+    }
 }
