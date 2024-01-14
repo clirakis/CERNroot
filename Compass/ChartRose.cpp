@@ -93,6 +93,22 @@ ChartRose::~ChartRose (void)
     delete fpoint2;
     delete fArrow;
 }
+void ChartRose::PreparePoint(Float_t angle)
+{
+    fpoint1->Rotate(angle);
+
+    if (fwh < fhh) 
+    {                   
+	fpoint1->Scale(kScalex*fScale, kScaley*fScale*fwh/fhh);
+    } 
+    else 
+    {
+	fpoint1->Scale(kScalex*fScale*fhh/fwh, kScaley*fScale);
+    }
+    
+    fpoint1->Shift( kZero, kZero);              // move to center of pad
+}
+
 /**
  ******************************************************************
  *
@@ -436,44 +452,56 @@ void ChartRose::NorthStar(void)
 {
     const Float_t kRadius = 105.0;   // Center of Star
     const Float_t theta   = 36.0 * TMath::DegToRad();
+    // four points, kinda static, verticies relative to triangle coodrinates
+    const Float_t xp[4] = {0.0, 0.0, (Float_t) 3.0*sin(theta), 0.0};
+    const Float_t yp[4] = {0.0, 6.0, (Float_t) 3.0*cos(theta), 0.0};
+    TPolyLine *pl;
+    // Input to poly line
     Float_t X[4], Y[4];
 
-    X[0] = kZero;
-    Y[0] = kRadius*fScale*kScaley + kZero;
-    X[1] = kZero;
-    Y[1] = (5.0 + kRadius)*fScale*kScaley + kZero;
-    X[2] = (2.0*sin(theta))*fScale*kScaley + kZero;
-    Y[2] = (2.0*cos(theta) + kRadius)*fScale*kScaley + kZero;
-    X[3] = kZero;
-    Y[3] = kRadius*fScale*kScaley + kZero;
-    for (Int_t i=0;i<4;i++) cout << X[i] << " " << Y[i] << endl;
-    TPolyLine *pl = new TPolyLine(4, X, Y);
-    pl->SetFillColor(2);
-    pl->Paint("f");
+    Float_t Angle = 0.0;
 
-#if 0
-    const Float_t kScalex = 0.5;
-    const Float_t kScaley = 0.5;
-
-    fpoint1->Rotate(angle);
-    fpoint2->Rotate(angle);
-
-    if (fwh < fhh) 
-    {                   // scale in oder to draw circle scale
-	fpoint1->Scale(kScalex, kScaley*fwh/fhh);
-	fpoint2->Scale(kScalex, kScaley*fwh/fhh);
-    } 
-    else 
+    for (UInt_t j=0;j<5;j++)
     {
-	fpoint1->Scale(kScalex*fhh/fwh, kScaley);
-	fpoint2->Scale(kScalex*fhh/fwh, kScaley);
+	for (UInt_t i=0;i<4;i++)
+	{
+	    fpoint1->SetXY(xp[i],yp[i]);
+	    fpoint1->Rotate(Angle);
+	    fpoint1->Shift(0.0, kRadius);
+	    PreparePoint(0.0);
+	    X[i] = fpoint1->GetX();
+	    Y[i] = fpoint1->GetY();
+	}
+	// Make all the filled ones
+	pl = new TPolyLine(4, X, Y);
+	pl->SetFillColor(6);
+	pl->Paint("f");
+	Angle = Angle + 72.0;
     }
-    
-    fpoint1->Shift( kZero, kZero);              // move to center of pad
-    fpoint2->Shift( kZero, kZero);
-    fPad->PaintLine( fpoint1->GetX(), fpoint1->GetY(),
-		     fpoint2->GetX(), fpoint2->GetY());
-#endif
+
+    // Now repeat for the open ones. 
+    Angle = 0.0;
+    for (UInt_t j=0;j<5;j++)
+    {
+	for (UInt_t i=0;i<4;i++)
+	{
+	    fpoint1->SetXY(-xp[i],yp[i]);
+	    fpoint1->Rotate(Angle);
+	    fpoint1->Shift(0.0, kRadius);
+	    PreparePoint(0.0);
+	    X[i] = fpoint1->GetX();
+	    Y[i] = fpoint1->GetY();
+	}
+	// Make all the filled ones
+	pl = new TPolyLine(4, X, Y);
+	pl->SetLineColor(6);
+	pl->SetLineWidth(1);
+	//pl->SetFillColor(0);
+	//pl->Paint("f");
+	pl->Paint();
+	Angle = Angle + 72.0;
+    }
+
 }
 /**
  ******************************************************************

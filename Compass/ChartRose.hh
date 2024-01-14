@@ -40,6 +40,7 @@ public:
    ~RosePoints() { }
 
     void SetXY(Coord_t x, Coord_t y) { SetX(x); SetY(y); };
+    void SetXY(const RosePoints&p) { SetX(p.GetX()); SetY(p.GetY());};
 
    // Rotates the coordinate system a angle degrees clockwise
    void Rotate(Float_t Angle)  
@@ -116,6 +117,7 @@ private:
 
     // Standard compass ring
     void Ring(Bool_t Outer=kTRUE, Float_t Variation = 0.0); 
+    void PreparePoint(Float_t Angle);
 
     RosePoints *fpoint1;
     RosePoints *fpoint2;
