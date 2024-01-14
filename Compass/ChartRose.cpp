@@ -518,6 +518,91 @@ void ChartRose::Cardinal(Float_t Variation)
 /**
  ******************************************************************
  *
+ * Function Name : PlotLetter
+ *
+ * Description : Make the letters pertaining to the Variation
+ *               
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::PlotLetter(Float_t Radius, Float_t Variation, 
+			   const char *text, Bool_t Top)
+{
+    const Float_t Ds     = 2.5 * 50.0; 
+    const Float_t DAngle = Ds/Radius;    // 25.0/((Float_t)N);
+    char  s[4];
+    TText   *tv;
+    Int_t   N      = strlen(text);
+    Float_t Angle;
+
+    if (Top)
+    {
+	Angle  = Variation - N/2*DAngle;
+    }
+    else
+    {
+	Angle  = 180.0 - Variation + N/2*DAngle;
+    }
+
+    // The word magnetic with the N 
+    for (UInt_t i=0; i<N; i++)
+    {
+	fpoint1->SetXY(0.0, Radius*fScale);
+	fpoint1->Rotate(Angle);
+	if (fwh < fhh) 
+	{                   // scale in oder to draw circle scale
+	    fpoint1->Scale(kScalex, kScaley*fwh/fhh);
+	} 
+	else 
+	{
+	    fpoint1->Scale(kScalex*fhh/fwh, kScaley);
+	}
+    
+	fpoint1->Shift( kZero, kZero);              // move to center of pad
+
+	tv = new TText();
+	// Add text
+	sprintf(s, "%c", text[i]);
+	tv->SetText(fpoint1->GetX(), fpoint1->GetY(), s);
+	tv->SetTextSize(0.015);
+	if (Top)
+	{
+	    tv->SetTextAlign(21);
+	    tv->SetTextColor(6);
+	    tv->SetTextAngle(-Angle);
+	}
+	else
+	{
+	    tv->SetTextAlign(23);
+	    tv->SetTextColor(6);
+	    tv->SetTextAngle(-Angle-180);
+	}
+	tv->Paint(); // Draw goes to paint
+
+	if (Top)
+	{
+	    Angle = Angle + DAngle;
+	}
+	else
+	{
+	    Angle = Angle - DAngle;
+	}
+    }
+}
+
+/**
+ ******************************************************************
+ *
  * Function Name : Letters
  *
  * Description : Make the letters pertaining to the Variation
@@ -540,41 +625,27 @@ void ChartRose::Letters(Float_t Variation, Float_t AnnualIncrease)
     const Float_t Radius1 = 47.0;
     const Float_t Radius2 = 17.0;
     const char    *MText   = "MAGNETIC";
-    char  s[4];
-
-    TText   *tv;
-    Int_t N        = strlen(MText);
-    Float_t DAngle = 25.0/((Float_t)N);
-    Float_t Angle  = Variation - 3.0*DAngle;
-    Float_t TextAngle = -3.0*DAngle + Variation;
-
-    // The word magnetic with the N 
-    for (UInt_t i=0; i<N; i++)
+    char text[128];
+    char Dir;
+    Int_t Deg = floor(Variation);
+    Int_t Min = floor((Variation - Deg)*60.0);
+    if (Variation<0.0)
     {
-	fpoint1->SetXY(0.0, Radius1*fScale);
-	fpoint1->Rotate(Angle);
-	if (fwh < fhh) 
-	{                   // scale in oder to draw circle scale
-	    fpoint1->Scale(kScalex, kScaley*fwh/fhh);
-	} 
-	else 
-	{
-	    fpoint1->Scale(kScalex*fhh/fwh, kScaley);
-	}
-    
-	fpoint1->Shift( kZero, kZero);              // move to center of pad
-
-	tv = new TText();
-	// Add text
-	sprintf(s, "%c", MText[i]);
-	tv->SetText(fpoint1->GetX(), fpoint1->GetY(), s);
-	tv->SetTextAlign(21);
-	tv->SetTextSize(0.015);
-	tv->SetTextColor(6);
-	tv->SetTextAngle(-TextAngle);
-	tv->Paint(); // Draw goes to paint
-
-	Angle = Angle + DAngle;
-	TextAngle = TextAngle + DAngle;
+	Dir = 'W';
     }
+    else
+    {
+	Dir = 'E';
+    }
+
+    PlotLetter(Radius1, Variation, MText);
+    //sprintf(text, "VAR %3d %2d %c (1985)", Deg, Min, Dir);
+    sprintf(text, "VAR %d %d %c (1985)", Deg, Min, Dir);
+    PlotLetter(Radius2, Variation, text);
+
+    sprintf(text, "ANNUAL DECREASE 8");
+    PlotLetter(Radius2, Variation, text, kFALSE);
+
+
+
 }

@@ -110,6 +110,8 @@ private:
     void MagneticNorth(Float_t Angle);
     void NorthStar(void);
     void Cardinal(Float_t Variation);
+    void PlotLetter(Float_t Radius,  Float_t Variation, const char *text, 
+		    Bool_t Top = kTRUE);
     void Letters(Float_t Variation, Float_t AnnualIncrease);
 
     // Standard compass ring
