@@ -101,7 +101,7 @@ private:
     const Float_t kScalex      = 0.5;
     const Float_t kScaley      = 0.5;
 
-    Float_t   fAspect;          // Aspect ratio
+    Float_t       fAspect;          // Aspect ratio
 
     // Break down the drawing a tad. Helper functions for each artifact.
     void DrawLine(Float_t angle=0.0);

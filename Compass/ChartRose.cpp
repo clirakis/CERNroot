@@ -226,6 +226,9 @@ void ChartRose::Paint(Option_t *)
     Ring(kFALSE, Var);
 
     Letters(Var, 0.0);
+
+    NorthStar();
+
 }
 /**
  ******************************************************************
@@ -431,6 +434,23 @@ void ChartRose::Ring(Bool_t Outer, Float_t Variation)
  */
 void ChartRose::NorthStar(void)
 {
+    const Float_t kRadius = 105.0;   // Center of Star
+    const Float_t theta   = 36.0 * TMath::DegToRad();
+    Float_t X[4], Y[4];
+
+    X[0] = kZero;
+    Y[0] = kRadius*fScale*kScaley + kZero;
+    X[1] = kZero;
+    Y[1] = (5.0 + kRadius)*fScale*kScaley + kZero;
+    X[2] = (2.0*sin(theta))*fScale*kScaley + kZero;
+    Y[2] = (2.0*cos(theta) + kRadius)*fScale*kScaley + kZero;
+    X[3] = kZero;
+    Y[3] = kRadius*fScale*kScaley + kZero;
+    for (Int_t i=0;i<4;i++) cout << X[i] << " " << Y[i] << endl;
+    TPolyLine *pl = new TPolyLine(4, X, Y);
+    pl->SetFillColor(2);
+    pl->Paint("f");
+
 #if 0
     const Float_t kScalex = 0.5;
     const Float_t kScaley = 0.5;
@@ -523,6 +543,10 @@ void ChartRose::Cardinal(Float_t Variation)
  * Description : Make the letters pertaining to the Variation
  *               
  * Inputs :
+ *    Radius - to put them at. (Degrees)
+ *    Variation - Angular variation (for rotating the text.) (Degrees)
+ *    text - to put a letter at a time, each letter is slightly rotated. 
+ *    At the top or bottom of the circle 
  *
  * Returns :
  *
