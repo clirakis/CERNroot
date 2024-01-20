@@ -82,9 +82,11 @@ public:
      * Errors:
      *
      */
-   void   Paint(Option_t *option);
+    void   Paint(Option_t *option);
 
-   ClassDef(ChartRose,0)  // Chart based compass rose
+    void SaveAs(const Char_t *Filename);
+
+    ClassDef(ChartRose,0)  // Chart based compass rose
 
 private:
     TPad      *fPad;            // pad where this compass rose is drawn

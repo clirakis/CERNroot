@@ -704,3 +704,27 @@ void ChartRose::Letters(Float_t Variation, Float_t AnnualIncrease)
 
 
 }
+/**
+ ******************************************************************
+ *
+ * Function Name : Cardinal
+ *
+ * Description : Make the inner most magnetic ring of the 
+ *               cardinal points
+ * Inputs :
+ *
+ * Returns :
+ *
+ * Error Conditions :
+ * 
+ * Unit Tested on: 
+ *
+ * Unit Tested by: CBL
+ *
+ *
+ *******************************************************************
+ */
+void ChartRose::SaveAs(const Char_t *Filename)
+{
+    fPad->SaveAs(Filename);
+}
