@@ -55,7 +55,7 @@ ChartRose::ChartRose (Int_t csize, Float_t Magnetic) : TObject()
    fPad->SetLineColor(6);     // pinkish. 
    fPad->SetLineWidth(1);
    fScale = 1.0/120.0;
-   fMagnetic = Magnetic * TMath::DegToRad();
+   fMagnetic = Magnetic;
    SetBit(kCanDelete);
    fpoint1 = new RosePoints();
    fpoint2 = new RosePoints();
@@ -223,25 +223,24 @@ void ChartRose::MagneticNorth(Float_t Angle)
  */
 void ChartRose::Paint(Option_t *)
 {
-    const Float_t Var = -4.0;   // temporary placeholder
     Float_t x0,y0, x1, y1;      // Working variables. 
     Float_t Angle, dAngle;
     fwh = (Float_t)fPad->XtoPixel(fPad->GetX2());
     fhh = (Float_t)fPad->YtoPixel(fPad->GetY1());
     fAspect = fwh/fhh;
 
-    MakeCenterCross(Var);
-    MagneticNorth(Var);
-    Cardinal(Var);
+    MakeCenterCross(fMagnetic);
+    MagneticNorth(fMagnetic);
+    Cardinal(fMagnetic);
     // True North major markings
     MajorPoints(kOuterMajorPoints, kOuterMajorPoints+kOuterPoints);
-    MajorPoints(kInnerMag[0], kInnerMag[1], Var);
-    MajorPoints(kInnerMag[2], kInnerMag[3], Var);
+    MajorPoints(kInnerMag[0], kInnerMag[1], fMagnetic);
+    MajorPoints(kInnerMag[2], kInnerMag[3], fMagnetic);
 
     Ring();
-    Ring(kFALSE, Var);
+    Ring(kFALSE, fMagnetic);
 
-    Letters(Var, 0.0);
+    Letters(fMagnetic, 0.0);
 
     NorthStar();
 
@@ -677,10 +676,14 @@ void ChartRose::Letters(Float_t Variation, Float_t AnnualIncrease)
     const Float_t Radius1 = 47.0;
     const Float_t Radius2 = 17.0;
     const char    *MText   = "MAGNETIC";
-    char text[128];
-    char Dir;
-    Int_t Deg = floor(Variation);
-    Int_t Min = floor((Variation - Deg)*60.0);
+    char    text[128];
+    char    Dir;
+    Int_t   Deg, Min;
+    Float_t DMS = fabs(Variation);
+
+    Deg = floor(DMS);
+    Min = floor((DMS - Deg)*60.0);
+
     if (Variation<0.0)
     {
 	Dir = 'W';
@@ -692,10 +695,10 @@ void ChartRose::Letters(Float_t Variation, Float_t AnnualIncrease)
 
     PlotLetter(Radius1, Variation, MText);
     //sprintf(text, "VAR %3d %2d %c (1985)", Deg, Min, Dir);
-    sprintf(text, "VAR %d %d %c (1985)", Deg, Min, Dir);
+    sprintf(text, "VAR %d %d %c (2010)", Deg, Min, Dir);
     PlotLetter(Radius2, Variation, text);
 
-    sprintf(text, "ANNUAL DECREASE 8");
+    sprintf(text, "ANNUAL DECREASE 0.3");
     PlotLetter(Radius2, Variation, text, kFALSE);
 
 

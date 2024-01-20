@@ -25,21 +25,14 @@ using namespace std;
 
 #include <string>
 #include <cmath>
-// #include <csignal>
 #include <ctime>
 #include <sys/types.h>
-// #include <sys/stat.h>
-// #include <fcntl.h>
-// #include <unistd.h>
-// #include <limits.h>
 #include <unistd.h>
-// #include <errno.h>
-// #include <cstdlib>
 #include <libconfig.h++>
 using namespace libconfig;
 
 #include "TFile.h"
-#include "TNtuple.h"
+#include "TNtupleD.h"
 
 
 /// Local Includes.
@@ -153,6 +146,15 @@ hdf5ToRoot::~hdf5ToRoot(void)
 
     /* close ntuple */
 
+
+    fRootFile->Write();
+    fRootFile->Close();
+    delete fRootFile;
+    fRootFile = NULL;
+
+    delete fNtuple;
+    fNtuple = NULL;
+
     // Make sure all file streams are closed
     Logger->Log("# hdf5ToRoot closed.\n");
     SET_DEBUG_STACK;
@@ -163,7 +165,7 @@ hdf5ToRoot::~hdf5ToRoot(void)
  *
  * Function Name : Do
  *
- * Description :
+ * Description : Perform the transfer. 
  *
  * Inputs :
  *
@@ -182,10 +184,25 @@ void hdf5ToRoot::Do(void)
 {
     SET_DEBUG_STACK;
     fRun = true;
-    while(fRun)
+
+    // Create a vector for holding the data. 
+    // How many columns are in the dataset? 
+    //size_t NCol = f5InputFile->NVariables();
+    const double *var;
+
+
+    size_t N = f5InputFile->NEntries();
+    cout << "Processing: " << N << " Entries." << endl;
+
+    for (size_t i=0 ;i<N; i++)
     {
-	sleep(1);
+	if(f5InputFile->DatasetReadRow(i))
+	{
+	    var = f5InputFile->RowData();
+	    fNtuple->Fill(var);
+	}
     }
+
     SET_DEBUG_STACK;
 }
 
@@ -232,6 +249,7 @@ bool hdf5ToRoot::OpenInputFile(const char *Filename)
     /* Log that this was done in the local text log file. */
     pLogger->LogTime("# Input file name %s at %s\n", Filename);
 
+    //cout << *f5InputFile ;
     return true;
 }
 /**
@@ -272,7 +290,7 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     p = strchr( name, (int)'.');
     *p = 0; // null terminate. 
     strcat(name, ".root");
-    cout << " New Filename: " << name << endl;
+    //cout << " New Filename: " << name << endl;
 
     /*
      * Initialize Root package.
@@ -287,6 +305,34 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     // Read some interesting data from the HDF5 input file and use it
     // to create the ntuple.
 
+    char Names[256];
+    char tmp[32];
+    const char *pName;
+
+    memset( Names, 0, sizeof(Names));
+
+    // How many columns are in the dataset? 
+    size_t NCol = f5InputFile->NVariables();
+    for (uint32_t i = 0;i< NCol; i++)
+    {
+	pName = f5InputFile->NameFromIndex(i);
+	if (i<NCol-1)
+	{
+	    sprintf(tmp,"%s:",pName);
+	    strcat(Names, tmp);
+	}
+	else
+	{
+	    strcat(Names, pName);
+	}
+    }
+    //cout << Names << endl;
+
+    const char *DataSetName = 
+	f5InputFile->HeaderInfo(H5Logger::kDATADESCRIPTOR);
+    //cout << DataSetName << endl;
+
+    fNtuple = new TNtupleD("hdf5ToRoot", DataSetName, Names);
 
     SET_DEBUG_STACK;
     return rc;

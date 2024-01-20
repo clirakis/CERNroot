@@ -63,8 +63,10 @@ public:
 class ChartRose : public TObject {
 public:
     /// Default Constructor 
-    /// default magnetic offset to true north is 4.0 degrees.  
-    ChartRose( Int_t csize=600, Float_t Magnetic=4.0);
+    /// default magnetic offset to true north is 
+    /// 41 18 30N  73 53 24W The declination is 12 45W 
+    /// changing by 0 0.3E per year
+    ChartRose( Int_t csize=600, Float_t Magnetic=-12.75);
     /// Default destructor
     virtual ~ChartRose();
 

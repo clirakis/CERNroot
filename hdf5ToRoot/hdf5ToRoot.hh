@@ -24,7 +24,7 @@
 #  include "CObject.hh" // Base class with all kinds of intermediate
 #  include "H5Logger.hh"
 #  include "filename.hh"
-class TNtuple;
+class TNtupleD;
 
 class hdf5ToRoot : public CObject
 {
@@ -82,7 +82,7 @@ private:
      * Output data to NTUPLE
      */
     TFile       *fRootFile;
-    TNtuple     *fNtuple;        // Output
+    TNtupleD    *fNtuple;        // Output
 
     /*! 
      * Configuration file name. 

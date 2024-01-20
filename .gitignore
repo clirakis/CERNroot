@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Data files
+*.h5
+
+# log files
+*.log
+
+# make byproducts
+make.depend
+

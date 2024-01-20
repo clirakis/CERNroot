@@ -183,14 +183,19 @@ int main(int argc, char **argv)
     ProcessCommandLineArgs(argc, argv);
     if (Initialize())
     {
-        cout << __GNUC__ << endl;
-	hdf5ToRoot *pModule = new hdf5ToRoot("HDF5TOROOT.cfg", Filename);
-
-	if (pModule->Error() == 0)
+	if (Filename !=NULL)
 	{
-	    pModule->Do();
-	}
+	    hdf5ToRoot *pModule = new hdf5ToRoot("HDF5TOROOT.cfg", Filename);
 
+	    if (pModule->Error() == 0)
+	    {
+		pModule->Do();
+	    }
+	}
+	else
+	{
+	    cout << "Please supply a filename to process with -f ..." << endl;
+	}
     }
     Terminate(0);
 }
