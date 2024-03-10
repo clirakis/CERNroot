@@ -247,7 +247,7 @@ bool hdf5ToRoot::OpenInputFile(const char *Filename)
     }
 
     /* Log that this was done in the local text log file. */
-    pLogger->LogTime("# Input file name %s at %s\n", Filename);
+    pLogger->LogTime("Input file name %s \n", Filename);
 
     //cout << *f5InputFile ;
     return true;
@@ -278,6 +278,7 @@ bool hdf5ToRoot::OpenInputFile(const char *Filename)
 bool hdf5ToRoot::OpenOutputFile(const char *Filename)
 {
     SET_DEBUG_STACK;
+    CLogger *pLogger = CLogger::GetThis();
     bool rc = false;
     char name[256]; 
     char *p;
@@ -287,7 +288,7 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     strncpy( name, Filename, sizeof(name));
 
     // find the dot in the input filename. 
-    p = strchr( name, (int)'.');
+    p = strstr( name, ".h5");
     *p = 0; // null terminate. 
     strcat(name, ".root");
     //cout << " New Filename: " << name << endl;
@@ -333,6 +334,8 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     //cout << DataSetName << endl;
 
     fNtuple = new TNtupleD("hdf5ToRoot", DataSetName, Names);
+
+    pLogger->LogTime("Output file name %s \n", name);
 
     SET_DEBUG_STACK;
     return rc;
