@@ -13,8 +13,7 @@
  *
  * Classification : Unclassified
  *
- * References : lassen-sk8.pdf - Manual
- *              tsip.pdf - main binary interface control document
+ * References : 
  *
  *
  *******************************************************************
@@ -187,8 +186,9 @@ void hdf5ToRoot::Do(void)
 
     // Create a vector for holding the data. 
     // How many columns are in the dataset? 
-    //size_t NCol = f5InputFile->NVariables();
+    size_t NCol = f5InputFile->NVariables();
     const double *var;
+    double *NewVar = new double[NCol+1];
 
 
     size_t N = f5InputFile->NEntries();
@@ -199,10 +199,12 @@ void hdf5ToRoot::Do(void)
 	if(f5InputFile->DatasetReadRow(i))
 	{
 	    var = f5InputFile->RowData();
-	    fNtuple->Fill(var);
+	    memcpy(NewVar, var, NCol*sizeof(double));
+	    NewVar[NCol] = (double) i;
+	    fNtuple->Fill(NewVar);
 	}
     }
-
+    delete [] NewVar;
     SET_DEBUG_STACK;
 }
 
@@ -306,7 +308,7 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     // Read some interesting data from the HDF5 input file and use it
     // to create the ntuple.
 
-    char Names[256];
+    char Names[1024];
     char tmp[32];
     const char *pName;
 
@@ -317,16 +319,12 @@ bool hdf5ToRoot::OpenOutputFile(const char *Filename)
     for (uint32_t i = 0;i< NCol; i++)
     {
 	pName = f5InputFile->NameFromIndex(i);
-	if (i<NCol-1)
-	{
-	    sprintf(tmp,"%s:",pName);
-	    strcat(Names, tmp);
-	}
-	else
-	{
-	    strcat(Names, pName);
-	}
+	sprintf(tmp,"%s:",pName);
+	strcat(Names, tmp);
     }
+    // 
+    // Append a count name as the last entry. 
+    strcat(Names, "Count");
     //cout << Names << endl;
 
     const char *DataSetName = 
